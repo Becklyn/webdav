@@ -9,8 +9,12 @@ namespace Becklyn\WebDav\Resource;
  */
 class File extends Resource
 {
-    protected function __construct(string $path, \DateTimeImmutable $lastModified, protected ?string $contentType, protected int $contentLength)
-    {
+    protected function __construct(
+        string $path,
+        \DateTimeImmutable $lastModified,
+        protected ?string $contentType,
+        protected int $contentLength,
+    ) {
         parent::__construct($path, $lastModified);
     }
 

@@ -5,8 +5,8 @@ namespace Becklyn\WebDav;
 /**
  * @author Marko Vujnovic <mv@becklyn.com>
  *
- * @since  2021-08-13
+ * @since  2021-08-16
  */
-class HttpException extends \Exception implements Exception
+interface Exception
 {
 }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Becklyn\WebDav\Tests\Resource;
 
@@ -9,17 +9,20 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @author Marko Vujnovic <mv@becklyn.com>
+ *
  * @since  2021-08-13
  *
- * @covers \Becklyn\WebDav\Resource\Resource
  * @covers \Becklyn\WebDav\Resource\File
  * @covers \Becklyn\WebDav\Resource\Folder
+ * @covers \Becklyn\WebDav\Resource\Resource
+ *
+ * @internal
  */
-class ResourceTest extends TestCase
+final class ResourceTest extends TestCase
 {
-    public function testCreateReturnsFolderIfGetContentLengthDavPropertyDoesNotExist(): void
+    public function testCreateReturnsFolderIfGetContentLengthDavPropertyDoesNotExist() : void
     {
-        $path = uniqid();
+        $path = \uniqid();
         $lastModified = 'Sun, 08 Aug 2021 23:04:04 GMT';
 
         $data = [
@@ -27,17 +30,17 @@ class ResourceTest extends TestCase
             '{DAV:}getcontenttype' => 'foobar',
         ];
 
-        $this->assertArrayNotHasKey('{DAV:}getcontentlength', $data);
+        self::assertArrayNotHasKey('{DAV:}getcontentlength', $data);
 
         $folder = Resource::create($path, $data);
-        $this->assertInstanceOf(Folder::class, $folder);
-        $this->assertEquals($path, $folder->path());
-        $this->assertEquals(new \DateTimeImmutable($lastModified), $folder->lastModified());
+        self::assertInstanceOf(Folder::class, $folder);
+        self::assertEquals($path, $folder->path());
+        self::assertEquals(new \DateTimeImmutable($lastModified), $folder->lastModified());
     }
 
-    public function testCreateReturnsFolderIfGetContentTypeDavPropertyContainsSubstringDirectory(): void
+    public function testCreateReturnsFolderIfGetContentTypeDavPropertyContainsSubstringDirectory() : void
     {
-        $path = uniqid();
+        $path = \uniqid();
         $lastModified = 'Sun, 08 Aug 2021 23:04:04 GMT';
 
         $data = [
@@ -46,20 +49,20 @@ class ResourceTest extends TestCase
             '{DAV:}getcontenttype' => 'somedirectorything',
         ];
 
-        $this->assertStringContainsString('directory', $data['{DAV:}getcontenttype']);
+        self::assertStringContainsString('directory', $data['{DAV:}getcontenttype']);
 
         $folder = Resource::create($path, $data);
-        $this->assertInstanceOf(Folder::class, $folder);
-        $this->assertEquals($path, $folder->path());
-        $this->assertEquals(new \DateTimeImmutable($lastModified), $folder->lastModified());
+        self::assertInstanceOf(Folder::class, $folder);
+        self::assertEquals($path, $folder->path());
+        self::assertEquals(new \DateTimeImmutable($lastModified), $folder->lastModified());
     }
 
-    public function testCreateReturnsFileIfBothGetContentLengthDavPropertyExistsAndGetContentTypeDavPropertyDoesNotContainSubstringDirectory(): void
+    public function testCreateReturnsFileIfBothGetContentLengthDavPropertyExistsAndGetContentTypeDavPropertyDoesNotContainSubstringDirectory() : void
     {
-        $path = uniqid();
+        $path = \uniqid();
         $lastModified = 'Sun, 08 Aug 2021 23:04:04 GMT';
-        $contentType = uniqid();
-        $contentLength = random_int(1, 1000);
+        $contentType = \uniqid();
+        $contentLength = \random_int(1, 1000);
 
         $data = [
             '{DAV:}getlastmodified' => $lastModified,
@@ -67,36 +70,36 @@ class ResourceTest extends TestCase
             '{DAV:}getcontenttype' => $contentType,
         ];
 
-        $this->assertArrayHasKey('{DAV:}getcontentlength', $data);
-        $this->assertStringNotContainsString('directory', $data['{DAV:}getcontenttype']);
+        self::assertArrayHasKey('{DAV:}getcontentlength', $data);
+        self::assertStringNotContainsString('directory', $data['{DAV:}getcontenttype']);
 
         $file = Resource::create($path, $data);
-        $this->assertInstanceOf(File::class, $file);
-        $this->assertEquals($path, $file->path());
-        $this->assertEquals(new \DateTimeImmutable($lastModified), $file->lastModified());
-        $this->assertEquals($contentLength, $file->contentLength());
-        $this->assertEquals($contentType, $file->contentType());
+        self::assertInstanceOf(File::class, $file);
+        self::assertEquals($path, $file->path());
+        self::assertEquals(new \DateTimeImmutable($lastModified), $file->lastModified());
+        self::assertEquals($contentLength, $file->contentLength());
+        self::assertEquals($contentType, $file->contentType());
     }
 
-    public function testCreateReturnsFileWithContentTypeNullIfContentLengthDavPropertyExistsAndGetContentTypeDavPropertyDoesNotExist(): void
+    public function testCreateReturnsFileWithContentTypeNullIfContentLengthDavPropertyExistsAndGetContentTypeDavPropertyDoesNotExist() : void
     {
-        $path = uniqid();
+        $path = \uniqid();
         $lastModified = 'Sun, 08 Aug 2021 23:04:04 GMT';
-        $contentLength = random_int(1, 1000);
+        $contentLength = \random_int(1, 1000);
 
         $data = [
             '{DAV:}getlastmodified' => $lastModified,
             '{DAV:}getcontentlength' => $contentLength,
         ];
 
-        $this->assertArrayHasKey('{DAV:}getcontentlength', $data);
-        $this->assertArrayNotHasKey('{DAV:}getcontenttype', $data);
+        self::assertArrayHasKey('{DAV:}getcontentlength', $data);
+        self::assertArrayNotHasKey('{DAV:}getcontenttype', $data);
 
         $file = Resource::create($path, $data);
-        $this->assertInstanceOf(File::class, $file);
-        $this->assertEquals($path, $file->path());
-        $this->assertEquals(new \DateTimeImmutable($lastModified), $file->lastModified());
-        $this->assertEquals($contentLength, $file->contentLength());
-        $this->assertNull($file->contentType());
+        self::assertInstanceOf(File::class, $file);
+        self::assertEquals($path, $file->path());
+        self::assertEquals(new \DateTimeImmutable($lastModified), $file->lastModified());
+        self::assertEquals($contentLength, $file->contentLength());
+        self::assertNull($file->contentType());
     }
 }

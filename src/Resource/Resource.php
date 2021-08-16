@@ -9,7 +9,10 @@ namespace Becklyn\WebDav\Resource;
  */
 class Resource
 {
-    protected function __construct(protected string $path, protected \DateTimeImmutable $lastModified) {}
+    protected function __construct(
+        protected string $path,
+        protected \DateTimeImmutable $lastModified,
+    ) {}
 
     public function path() : string
     {

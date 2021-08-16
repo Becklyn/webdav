@@ -7,6 +7,6 @@ namespace Becklyn\WebDav;
  *
  * @since  2021-08-13
  */
-class ResourceNotAFolderException extends \Exception
+class ResourceNotAFolderException extends \Exception implements Exception
 {
 }

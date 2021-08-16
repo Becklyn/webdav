@@ -9,7 +9,11 @@ namespace Becklyn\WebDav;
  */
 class Config
 {
-    public function __construct(private string $baseUri, private string $username, private string $password) {}
+    public function __construct(
+        private string $baseUri,
+        private string $username,
+        private string $password,
+    ) {}
 
     public function baseUri() : string
     {

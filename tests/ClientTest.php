@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Becklyn\WebDav\Tests;
 
@@ -13,28 +13,32 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Sabre\DAV\Client as SabreClient;
 use Sabre\HTTP\ClientHttpException;
 use Sabre\HTTP\Response;
 
 /**
  * @author Marko Vujnovic <mv@becklyn.com>
+ *
  * @since  2021-08-13
  *
  * @covers \Becklyn\WebDav\Client
  * @covers \Becklyn\WebDav\Config
+ *
+ * @internal
  */
-class ClientTest extends TestCase
+final class ClientTest extends TestCase
 {
     use ProphecyTrait;
 
-    private ObjectProphecy|\Sabre\DAV\Client $sabreClient;
+    private ObjectProphecy|SabreClient $sabreClient;
 
-    public function setUp(): void
+    protected function setUp() : void
     {
-        $this->sabreClient = $this->prophesize(\Sabre\DAV\Client::class);
+        $this->sabreClient = $this->prophesize(SabreClient::class);
     }
 
-    private function getFixture(): Client
+    private function getFixture() : Client
     {
         $client = new Client(new Config('foo', 'bar', 'baz'));
 
@@ -46,23 +50,23 @@ class ClientTest extends TestCase
         return $client;
     }
 
-    public function testListFolderContentsReturnsArrayOfResourcesInFolderIfSabreClientPropfindReturnsArrayStartingWithTheListedFolder(): void
+    public function testListFolderContentsReturnsArrayOfResourcesInFolderIfSabreClientPropfindReturnsArrayStartingWithTheListedFolder() : void
     {
-        $queriedFolderPath = uniqid();
-        $expectedResource1 = "$queriedFolderPath/sample_file.csv";
-        $expectedResource2 = "$queriedFolderPath/sample_folder";
+        $queriedFolderPath = \uniqid();
+        $expectedResource1 = "{$queriedFolderPath}/sample_file.csv";
+        $expectedResource2 = "{$queriedFolderPath}/sample_folder";
 
         $sabrePropfindResult = [
-            "/absolute/path/to/$queriedFolderPath" => [
+            "/absolute/path/to/{$queriedFolderPath}" => [
                 '{DAV:}getcontenttype' => 'httpd/unix-directory',
                 '{DAV:}getlastmodified' => 'Sun, 15 Aug 2021 23:04:03 GMT',
             ],
-            "/absolute/path/to/$expectedResource1" => [
+            "/absolute/path/to/{$expectedResource1}" => [
                 '{DAV:}getcontentlength' => '244456',
                 '{DAV:}getcontenttype' => 'text/csv',
                 '{DAV:}getlastmodified' => 'Thu, 12 Aug 2021 23:04:03 GMT',
             ],
-            "/absolute/path/to/$expectedResource2" => [
+            "/absolute/path/to/{$expectedResource2}" => [
                 '{DAV:}getcontenttype' => 'httpd/unix-directory',
                 '{DAV:}getlastmodified' => 'Sun, 15 Aug 2021 23:04:03 GMT',
             ],
@@ -77,14 +81,14 @@ class ClientTest extends TestCase
         $client = $this->getFixture();
         $results = $client->listFolderContents($queriedFolderPath);
 
-        $this->assertCount(2, $results);
-        $this->assertInstanceOf(File::class, $results[0]);
-        $this->assertStringEndsWith($expectedResource1, $results[0]->path());
-        $this->assertInstanceOf(Folder::class, $results[1]);
-        $this->assertStringEndsWith($expectedResource2, $results[1]->path());
+        self::assertCount(2, $results);
+        self::assertInstanceOf(File::class, $results[0]);
+        self::assertStringEndsWith($expectedResource1, $results[0]->path());
+        self::assertInstanceOf(Folder::class, $results[1]);
+        self::assertStringEndsWith($expectedResource2, $results[1]->path());
     }
 
-    public function testListFolderContentsThrowsResourceNotFoundExceptionWithCode404IfSabreClientThrowsClientHttpExceptionWithStatus404(): void
+    public function testListFolderContentsThrowsResourceNotFoundExceptionWithCode404IfSabreClientThrowsClientHttpExceptionWithStatus404() : void
     {
         $expectedSabreClientException = new ClientHttpException(new Response(404));
 
@@ -98,10 +102,10 @@ class ClientTest extends TestCase
         $this->expectExceptionCode(404);
 
         $client = $this->getFixture();
-        $client->listFolderContents(uniqid());
+        $client->listFolderContents(\uniqid());
     }
 
-    public function testListFolderContentsThrowsHttpExceptionWithSameMessageAndCodeAsClientHttpExceptionThrownBySabreClientIfItIsStatusOtherThan404(): void
+    public function testListFolderContentsThrowsHttpExceptionWithSameMessageAndCodeAsClientHttpExceptionThrownBySabreClientIfItIsStatusOtherThan404() : void
     {
         $expectedStatus = 500;
         $expectedSabreClientException = new ClientHttpException(new Response($expectedStatus));
@@ -117,12 +121,12 @@ class ClientTest extends TestCase
         $this->expectExceptionMessage($expectedSabreClientException->getMessage());
 
         $client = $this->getFixture();
-        $client->listFolderContents(uniqid());
+        $client->listFolderContents(\uniqid());
     }
 
-    public function testListFolderContentsThrowsResourceNotAFolderExceptionIfSabreClientPropfindReturnsArrayStartingWithAFile(): void
+    public function testListFolderContentsThrowsResourceNotAFolderExceptionIfSabreClientPropfindReturnsArrayStartingWithAFile() : void
     {
-        $queriedFolderPath = uniqid();
+        $queriedFolderPath = \uniqid();
 
         $sabrePropfindResult = [
             "/absolute/path/to/some/file" => [
@@ -144,24 +148,24 @@ class ClientTest extends TestCase
         $client->listFolderContents($queriedFolderPath);
     }
 
-    public function testGetFileContentsReturnsContentsOfFileIfSabreClientGetRequestReturnsItInCode200ResponseBody(): void
+    public function testGetFileContentsReturnsContentsOfFileIfSabreClientGetRequestReturnsItInCode200ResponseBody() : void
     {
-        $queriedFilePath = uniqid();
-        $expectedFileContents = uniqid();
+        $queriedFilePath = \uniqid();
+        $expectedFileContents = \uniqid();
 
         $sabreGetResponse = [
             'statusCode' => 200,
-            'body' => $expectedFileContents
+            'body' => $expectedFileContents,
         ];
 
         $this->sabreClient->request('GET', $queriedFilePath)->willReturn($sabreGetResponse);
 
         $client = $this->getFixture();
         $result = $client->getFileContents($queriedFilePath);
-        $this->assertEquals($expectedFileContents, $result);
+        self::assertSame($expectedFileContents, $result);
     }
 
-    public function testGetFileContentsThrowsResourceNotFoundExceptionWithCode404IfSabreClientReturnsResponseWithCode404(): void
+    public function testGetFileContentsThrowsResourceNotFoundExceptionWithCode404IfSabreClientReturnsResponseWithCode404() : void
     {
         $sabreGetResponse = [
             'statusCode' => 404,
@@ -173,10 +177,10 @@ class ClientTest extends TestCase
         $this->expectExceptionCode(404);
 
         $client = $this->getFixture();
-        $client->getFileContents(uniqid());
+        $client->getFileContents(\uniqid());
     }
 
-    public function testGetFileContentsThrowsHttpExceptionWithSameCodeAsSabreClientResponseIfItIsOtherThan200And404(): void
+    public function testGetFileContentsThrowsHttpExceptionWithSameCodeAsSabreClientResponseIfItIsOtherThan200And404() : void
     {
         $sabreGetResponse = [
             'statusCode' => 500,
@@ -188,6 +192,6 @@ class ClientTest extends TestCase
         $this->expectExceptionCode($sabreGetResponse['statusCode']);
 
         $client = $this->getFixture();
-        $client->getFileContents(uniqid());
+        $client->getFileContents(\uniqid());
     }
 }
