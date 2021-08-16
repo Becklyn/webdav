@@ -1,0 +1,30 @@
+{
+    "name": "becklyn/webdav",
+    "description": "Lightweight WebDav client",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marko Vujnovic",
+            "email": "mv@becklyn.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "sabre/dav": "^4.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "phpspec/prophecy-phpunit": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Becklyn\\WebDav\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Becklyn\\WebDav\\Tests\\": "tests/"
+        }
+    }
+}
