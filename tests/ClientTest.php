@@ -53,22 +53,19 @@ class ClientTest extends TestCase
         $expectedResource2 = "$queriedFolderPath/sample_folder";
 
         $sabrePropfindResult = [
-            "/absolute/path/to/$queriedFolderPath" =>
-                array (
-                    '{DAV:}getcontenttype' => 'httpd/unix-directory',
-                    '{DAV:}getlastmodified' => 'Sun, 15 Aug 2021 23:04:03 GMT',
-                ),
-            "/absolute/path/to/$expectedResource1" =>
-                array (
-                    '{DAV:}getcontentlength' => '244456',
-                    '{DAV:}getcontenttype' => 'text/csv',
-                    '{DAV:}getlastmodified' => 'Thu, 12 Aug 2021 23:04:03 GMT',
-                ),
-            "/absolute/path/to/$expectedResource2" =>
-                array (
-                    '{DAV:}getcontenttype' => 'httpd/unix-directory',
-                    '{DAV:}getlastmodified' => 'Sun, 15 Aug 2021 23:04:03 GMT',
-                ),
+            "/absolute/path/to/$queriedFolderPath" => [
+                '{DAV:}getcontenttype' => 'httpd/unix-directory',
+                '{DAV:}getlastmodified' => 'Sun, 15 Aug 2021 23:04:03 GMT',
+            ],
+            "/absolute/path/to/$expectedResource1" => [
+                '{DAV:}getcontentlength' => '244456',
+                '{DAV:}getcontenttype' => 'text/csv',
+                '{DAV:}getlastmodified' => 'Thu, 12 Aug 2021 23:04:03 GMT',
+            ],
+            "/absolute/path/to/$expectedResource2" => [
+                '{DAV:}getcontenttype' => 'httpd/unix-directory',
+                '{DAV:}getlastmodified' => 'Sun, 15 Aug 2021 23:04:03 GMT',
+            ],
         ];
 
         $this->sabreClient->propFind($queriedFolderPath, [
@@ -128,12 +125,11 @@ class ClientTest extends TestCase
         $queriedFolderPath = uniqid();
 
         $sabrePropfindResult = [
-            "/absolute/path/to/some/file" =>
-                array (
-                    '{DAV:}getcontentlength' => '244456',
-                    '{DAV:}getcontenttype' => 'text/csv',
-                    '{DAV:}getlastmodified' => 'Thu, 12 Aug 2021 23:04:03 GMT',
-                ),
+            "/absolute/path/to/some/file" => [
+                '{DAV:}getcontentlength' => '244456',
+                '{DAV:}getcontenttype' => 'text/csv',
+                '{DAV:}getlastmodified' => 'Thu, 12 Aug 2021 23:04:03 GMT',
+            ],
         ];
 
         $this->sabreClient->propFind($queriedFolderPath, [
