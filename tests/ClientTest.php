@@ -88,40 +88,48 @@ final class ClientTest extends TestCase
         self::assertStringEndsWith($expectedResource2, $results[1]->path());
     }
 
-    public function testListFolderContentsThrowsResourceNotFoundExceptionWithCode404IfSabreClientThrowsClientHttpExceptionWithStatus404() : void
-    {
-        $expectedSabreClientException = new ClientHttpException(new Response(404));
-
+    /**
+     * @dataProvider provideSabreClientHttpExceptionAndExpectedBecklynHttpException
+     */
+    public function testListFolderContentsThrowsAppropriateHttpExceptionDependingOnClientHttpExceptionThrownBySabreClient(
+        ClientHttpException $sabreClientException,
+        string $expectedExceptionClass,
+        int $expectedExceptionCode,
+        ?string $expectedExceptionMessage
+    ): void {
         $this->sabreClient->propFind(Argument::any(), [
             '{DAV:}getcontentlength',
             '{DAV:}getcontenttype',
             '{DAV:}getlastmodified',
-        ], 1)->willThrow($expectedSabreClientException);
+        ], 1)->willThrow($sabreClientException);
 
-        $this->expectException(ResourceNotFoundException::class);
-        $this->expectExceptionCode(404);
+        $this->expectException($expectedExceptionClass);
+        $this->expectExceptionCode($expectedExceptionCode);
+        if ($expectedExceptionMessage !== null) {
+            $this->expectExceptionMessage($expectedExceptionMessage);
+        }
 
         $client = $this->getFixture();
         $client->listFolderContents(\uniqid());
     }
 
-    public function testListFolderContentsThrowsHttpExceptionWithSameMessageAndCodeAsClientHttpExceptionThrownBySabreClientIfItIsStatusOtherThan404() : void
+    public function provideSabreClientHttpExceptionAndExpectedBecklynHttpException () : iterable
     {
-        $expectedStatus = 500;
-        $expectedSabreClientException = new ClientHttpException(new Response($expectedStatus));
+        yield 'throws ResourceNotFoundException with code 404 if sabre client throws ClientHttpException with status 404' => [
+            'sabre client exception' => new ClientHttpException(new Response(404)),
+            'expected becklyn exception' => ResourceNotFoundException::class,
+            'expected exception code' => 404,
+            'expected exception message' => null
+        ];
 
-        $this->sabreClient->propFind(Argument::any(), [
-            '{DAV:}getcontentlength',
-            '{DAV:}getcontenttype',
-            '{DAV:}getlastmodified',
-        ], 1)->willThrow($expectedSabreClientException);
+        $e = new ClientHttpException(new Response(500));
 
-        $this->expectException(HttpException::class);
-        $this->expectExceptionCode($expectedStatus);
-        $this->expectExceptionMessage($expectedSabreClientException->getMessage());
-
-        $client = $this->getFixture();
-        $client->listFolderContents(\uniqid());
+        yield 'throws HttpException with same message and code as ClientHttpException thrown by sabre client if it is status other than 404' => [
+            'sabre client exception' => $e,
+            'expected becklyn exception' => HttpException::class,
+            'expected exception code' => $e->getCode(),
+            'expected exception message' => $e->getMessage()
+        ];
     }
 
     public function testListFolderContentsThrowsResourceNotAFolderExceptionIfSabreClientPropfindReturnsArrayStartingWithAFile() : void
@@ -165,33 +173,41 @@ final class ClientTest extends TestCase
         self::assertSame($expectedFileContents, $result);
     }
 
-    public function testGetFileContentsThrowsResourceNotFoundExceptionWithCode404IfSabreClientReturnsResponseWithCode404() : void
-    {
-        $sabreGetResponse = [
-            'statusCode' => 404,
-        ];
+    /**
+     * @dataProvider provideSabreClientResponseAndExpectedHttpException
+     */
+    public function testGetFileContentsThrowsAppropriateHttpExceptionDependingOnStatusCodeInSabreClientResponse(
+        array $sabreResponse,
+        string $expectedExceptionClass,
+        int $expectedExceptionCode
+    ): void {
+        $this->sabreClient->request('GET', Argument::any())->willReturn($sabreResponse);
 
-        $this->sabreClient->request('GET', Argument::any())->willReturn($sabreGetResponse);
-
-        $this->expectException(ResourceNotFoundException::class);
-        $this->expectExceptionCode(404);
+        $this->expectException($expectedExceptionClass);
+        $this->expectExceptionCode($expectedExceptionCode);
 
         $client = $this->getFixture();
         $client->getFileContents(\uniqid());
     }
 
-    public function testGetFileContentsThrowsHttpExceptionWithSameCodeAsSabreClientResponseIfItIsOtherThan200And404() : void
+    public function provideSabreClientResponseAndExpectedHttpException () : iterable
     {
-        $sabreGetResponse = [
-            'statusCode' => 500,
+        yield 'throws ResourceNotFoundException with code 404 if sabre client returns 404 response' => [
+            'sabre response' => [
+                'statusCode' => 404,
+            ],
+            'expected exception class' => ResourceNotFoundException::class,
+            'expected exception code' => 404
         ];
 
-        $this->sabreClient->request('GET', Argument::any())->willReturn($sabreGetResponse);
+        $code = 500;
 
-        $this->expectException(HttpException::class);
-        $this->expectExceptionCode($sabreGetResponse['statusCode']);
-
-        $client = $this->getFixture();
-        $client->getFileContents(\uniqid());
+        yield 'throws HttpException with same code as sabre client response if it is other than 200 and 404' => [
+            'sabre response' => [
+                'statusCode' => $code,
+            ],
+            'expected exception class' => HttpException::class,
+            'expected exception code' => $code
+        ];
     }
 }
