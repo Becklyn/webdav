@@ -27,38 +27,38 @@ final class ResourceTest extends TestCase
         array $davData,
         string $path,
         \DateTimeImmutable $expectedLastModified,
-    ): void {
+    ) : void {
         $folder = Resource::create($path, $davData);
         self::assertInstanceOf(Folder::class, $folder);
         self::assertEquals($path, $folder->path());
         self::assertEquals($expectedLastModified, $folder->lastModified());
     }
 
-    public function provideFolderData(): iterable
+    public function provideFolderData() : iterable
     {
         $path = \uniqid();
         $lastModified = 'Sun, 08 Aug 2021 23:04:04 GMT';
 
         yield 'if getcontentlength DAV prop doesn\'t exist regardless of what the getcontenttype prop contains' => [
-            'dav data'                => [
+            'dav data' => [
                 '{DAV:}getlastmodified' => $lastModified,
-                '{DAV:}getcontenttype'  => 'foobar',
+                '{DAV:}getcontenttype' => 'foobar',
             ],
-            'path'                    => $path,
-            'expected last modified'  => new \DateTimeImmutable($lastModified),
+            'path' => $path,
+            'expected last modified' => new \DateTimeImmutable($lastModified),
         ];
 
         $path = \uniqid();
         $lastModified = 'Sun, 08 Aug 2021 23:04:04 GMT';
 
         yield 'if getcontenttype DAV prop containst substring \'directory\' even if getcontentlength prop exists' => [
-            'dav data'                => [
-                '{DAV:}getlastmodified'  => $lastModified,
+            'dav data' => [
+                '{DAV:}getlastmodified' => $lastModified,
                 '{DAV:}getcontentlength' => 1234,
-                '{DAV:}getcontenttype'   => 'directory',
+                '{DAV:}getcontenttype' => 'directory',
             ],
-            'path'                    => $path,
-            'expected last modified'  => new \DateTimeImmutable($lastModified),
+            'path' => $path,
+            'expected last modified' => new \DateTimeImmutable($lastModified),
         ];
     }
 

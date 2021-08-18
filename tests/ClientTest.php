@@ -96,7 +96,7 @@ final class ClientTest extends TestCase
         string $expectedExceptionClass,
         int $expectedExceptionCode,
         ?string $expectedExceptionMessage
-    ): void {
+    ) : void {
         $this->sabreClient->propFind(Argument::any(), [
             '{DAV:}getcontentlength',
             '{DAV:}getcontenttype',
@@ -105,7 +105,8 @@ final class ClientTest extends TestCase
 
         $this->expectException($expectedExceptionClass);
         $this->expectExceptionCode($expectedExceptionCode);
-        if ($expectedExceptionMessage !== null) {
+
+        if (null !== $expectedExceptionMessage) {
             $this->expectExceptionMessage($expectedExceptionMessage);
         }
 
@@ -119,7 +120,7 @@ final class ClientTest extends TestCase
             'sabre client exception' => new ClientHttpException(new Response(404)),
             'expected becklyn exception' => ResourceNotFoundException::class,
             'expected exception code' => 404,
-            'expected exception message' => null
+            'expected exception message' => null,
         ];
 
         $e = new ClientHttpException(new Response(500));
@@ -128,7 +129,7 @@ final class ClientTest extends TestCase
             'sabre client exception' => $e,
             'expected becklyn exception' => HttpException::class,
             'expected exception code' => $e->getCode(),
-            'expected exception message' => $e->getMessage()
+            'expected exception message' => $e->getMessage(),
         ];
     }
 
@@ -180,7 +181,7 @@ final class ClientTest extends TestCase
         array $sabreResponse,
         string $expectedExceptionClass,
         int $expectedExceptionCode
-    ): void {
+    ) : void {
         $this->sabreClient->request('GET', Argument::any())->willReturn($sabreResponse);
 
         $this->expectException($expectedExceptionClass);
@@ -197,7 +198,7 @@ final class ClientTest extends TestCase
                 'statusCode' => 404,
             ],
             'expected exception class' => ResourceNotFoundException::class,
-            'expected exception code' => 404
+            'expected exception code' => 404,
         ];
 
         $code = 500;
@@ -207,7 +208,7 @@ final class ClientTest extends TestCase
                 'statusCode' => $code,
             ],
             'expected exception class' => HttpException::class,
-            'expected exception code' => $code
+            'expected exception code' => $code,
         ];
     }
 }
