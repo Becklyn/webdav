@@ -24,6 +24,12 @@ class Resource
         return $this->lastModified;
     }
 
+    public function name() : string
+    {
+        $explosion = \explode('/', $this->path);
+        return end($explosion);
+    }
+
     public static function create (string $path, array $data) : Folder|File
     {
         if (!\array_key_exists('{DAV:}getcontentlength', $data) ||

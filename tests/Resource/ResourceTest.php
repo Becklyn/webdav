@@ -107,4 +107,16 @@ final class ResourceTest extends TestCase
         self::assertEquals($contentLength, $file->contentLength());
         self::assertNull($file->contentType());
     }
+
+    public function testNameReturnsLastElementOfPath(): void
+    {
+        $name = uniqid() . '.ext';
+        $path = '/foo/bar/baz/' . $name;
+        $resource = Resource::create($path, [
+            '{DAV:}getlastmodified' => 'Sun, 08 Aug 2021 23:04:04 GMT',
+            '{DAV:}getcontenttype' => 'foobar',
+        ]);
+
+        self::assertEquals($name, $resource->name());
+    }
 }
